@@ -1,15 +1,10 @@
+using login_data_access.Contexts.SecurityContext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace login_web_api
 {
@@ -25,6 +20,8 @@ namespace login_web_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string securityConnectionString = Configuration.GetConnectionString("SecurityConnection");
+            services.AddDbContextPool<SecurityContext>(options => options.UseMySql(securityConnectionString, ServerVersion.AutoDetect(securityConnectionString)));
 
             services.AddControllers();
         }
