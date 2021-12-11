@@ -3,40 +3,22 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using login_data_access.Contexts.SecurityContext;
 
 namespace login_data_access.Migrations
 {
     [DbContext(typeof(SecurityContext))]
-    partial class SecurityContextModelSnapshot : ModelSnapshot
+    [Migration("20211211010913_security-context-drop-sesions")]
+    partial class securitycontextdropsesions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "5.0.12");
-
-            modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.Sesion", b =>
-                {
-                    b.Property<byte[]>("Token")
-                        .HasColumnType("varbinary(64)")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn);
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ValidUntil")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("Token")
-                        .HasName("pk_sesions");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("sesions");
-                });
 
             modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.User", b =>
                 {
@@ -55,29 +37,20 @@ namespace login_data_access.Migrations
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("varbinary(128)");
+                        .HasColumnType("varbinary(64)");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("varbinary(32)");
+                        .HasColumnType("varbinary(16)");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("Name")
                         .IsUnique()
                         .HasDatabaseName("unq_users_name");
 
                     b.ToTable("users");
-                });
-
-            modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.Sesion", b =>
-                {
-                    b.HasOne("login_data_access.Contexts.SecurityContext.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("User_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

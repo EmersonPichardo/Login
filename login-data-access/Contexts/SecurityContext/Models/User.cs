@@ -18,13 +18,13 @@ namespace login_data_access.Contexts.SecurityContext.Models
                 builder.ToTable("users");
                 builder.HasKey(user => user.Id).HasName("pk_users");
 
-                builder.HasIndex(user => user.Name).HasDatabaseName("ind_users_name");
+                builder.HasIndex(user => user.Email).IsUnique().HasDatabaseName("unq_users_name");
 
                 builder.Property(user => user.Id).HasColumnType("int").UseMySqlIdentityColumn().IsRequired();
                 builder.Property(user => user.Email).HasColumnType("varchar(75)").IsRequired();
                 builder.Property(user => user.Name).HasColumnType("varchar(20)").IsRequired();
-                builder.Property(user => user.Password).HasColumnType("varbinary(20)").IsRequired();
-                builder.Property(user => user.Salt).HasColumnType("varbinary(8)").IsRequired();
+                builder.Property(user => user.Password).HasColumnType("varbinary(128)").IsRequired();
+                builder.Property(user => user.Salt).HasColumnType("varbinary(32)").IsRequired();
             }
         }
     }

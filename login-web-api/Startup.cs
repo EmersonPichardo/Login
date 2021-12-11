@@ -1,4 +1,5 @@
 using login_data_access.Contexts.SecurityContext;
+using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,9 @@ namespace login_web_api
         {
             string securityConnectionString = Configuration.GetConnectionString("SecurityConnection");
             services.AddDbContextPool<SecurityContext>(options => options.UseMySql(securityConnectionString, ServerVersion.AutoDetect(securityConnectionString)));
+
+            services.Configure<HashingConfiguration>(Configuration.GetSection("Hashing"));
+            services.Configure<SesionConfiguration>(Configuration.GetSection("Sesion"));
 
             services.AddControllers();
         }

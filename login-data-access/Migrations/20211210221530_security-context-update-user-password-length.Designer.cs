@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using login_data_access.Contexts.SecurityContext;
 
 namespace login_data_access.Migrations
 {
     [DbContext(typeof(SecurityContext))]
-    partial class SecurityContextModelSnapshot : ModelSnapshot
+    [Migration("20211210221530_security-context-update-user-password-length")]
+    partial class securitycontextupdateuserpasswordlength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,13 +23,13 @@ namespace login_data_access.Migrations
             modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.Sesion", b =>
                 {
                     b.Property<byte[]>("Token")
-                        .HasColumnType("varbinary(64)")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn);
+                        .HasColumnType("varbinary(3072)");
 
                     b.Property<int>("User_Id")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ValidUntil")
+                    b.Property<DateTime>("ValidSince")
                         .HasColumnType("datetime");
 
                     b.HasKey("Token")
@@ -55,18 +57,17 @@ namespace login_data_access.Migrations
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("varbinary(128)");
+                        .HasColumnType("varbinary(64)");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("varbinary(32)");
+                        .HasColumnType("varbinary(8)");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("unq_users_name");
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ind_users_name");
 
                     b.ToTable("users");
                 });
