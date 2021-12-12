@@ -2,7 +2,9 @@
 using login_data_access.Contexts.SecurityContext.Models;
 using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -22,6 +24,34 @@ namespace login_web_api.Controllers.Login
         {
             this.context = context;
             this.sesionConfiguration = sesionConfiguration.Value;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<bool>> IsTokenValid()
+        {
+            try
+            {
+                StringValues token;
+                if (!Request.Headers.TryGetValue("Token", out token)) return BadRequest();
+
+                if (string.IsNullOrWhiteSpace(token)) return BadRequest();
+
+                Guid tokenGuid;
+                if (!Guid.TryParse(token, out tokenGuid)) return BadRequest();
+
+                Sesion sesion = await context.Sesions.FindAsync(tokenGuid.ToByteArray());
+                if (sesion == null || sesion?.ValidUntil <= DateTime.Now) return Ok(false);
+
+                sesion.ValidUntil = DateTime.Now.AddMinutes(sesionConfiguration.Minutes);
+                context.Entry(sesion).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+
+                return Ok(true);
+            }
+            catch (Exception exception)
+            {
+                return Problem(title: exception.Message, detail: exception.StackTrace);
+            }
         }
 
         [HttpPost]
