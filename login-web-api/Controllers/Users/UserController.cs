@@ -7,13 +7,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace login_web_api.Controllers.Users
 {
-    [Route("api/user")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -26,6 +24,41 @@ namespace login_web_api.Controllers.Users
             this.context = context;
             this.hashingConfiguration = hashingConfiguration.Value;
             this.sesionConfiguration = sesionConfiguration.Value;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Register(NewUser newUser)
+        {
+            try
+            {
+                if (newUser == null ||
+                    string.IsNullOrWhiteSpace(newUser.Email) ||
+                    string.IsNullOrWhiteSpace(newUser.Name) ||
+                    string.IsNullOrWhiteSpace(newUser.Password)
+                )
+                    return BadRequest();
+
+                User user = context.Users.SingleOrDefault(user => user.Email == newUser.Email);
+
+                if (user != null) return Conflict();
+
+                user = new User()
+                {
+                    Email = newUser.Email,
+                    Name = newUser.Name
+                };
+
+                (user.Password, user.Salt) = PasswordGenerator.Generate(newUser.Password, hashingConfiguration);
+
+                await context.AddAsync(user);
+                await context.SaveChangesAsync();
+
+                return Created("", newUser);
+            }
+            catch (Exception exception)
+            {
+                return Problem(title: exception.Message, detail: exception.StackTrace);
+            }
         }
 
         [HttpGet]
@@ -58,52 +91,6 @@ namespace login_web_api.Controllers.Users
                 };
 
                 return Ok(data);
-            }
-            catch (Exception exception)
-            {
-                return Problem(title: exception.Message, detail: exception.StackTrace);
-            }
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Register(NewUser newUser)
-        {
-            try
-            {
-                if (newUser == null ||
-                    string.IsNullOrWhiteSpace(newUser.Email) ||
-                    string.IsNullOrWhiteSpace(newUser.Name) ||
-                    string.IsNullOrWhiteSpace(newUser.Password)
-                )
-                    return BadRequest();
-
-                User user = context.Users.SingleOrDefault(user => user.Email == newUser.Email);
-
-                if (user != null) return Conflict();
-
-                user = new User()
-                {
-                    Email = newUser.Email,
-                    Name = newUser.Name
-                };
-
-                byte[] pureSalt = new byte[hashingConfiguration.SaltLength];
-                byte[] interations = BitConverter.GetBytes(hashingConfiguration.Iterations);
-                byte[] algorithm = Encoding.UTF8.GetBytes(hashingConfiguration.Algorithm);
-
-                new RNGCryptoServiceProvider().GetNonZeroBytes(pureSalt);
-
-                user.Salt = new byte[hashingConfiguration.SaltLength + interations.Length + algorithm.Length];
-                Buffer.BlockCopy(pureSalt, 0, user.Salt, 0, pureSalt.Length);
-                Buffer.BlockCopy(interations, 0, user.Salt, pureSalt.Length, interations.Length);
-                Buffer.BlockCopy(algorithm, 0, user.Salt, pureSalt.Length + interations.Length, algorithm.Length);
-
-                user.Password = new Rfc2898DeriveBytes(newUser.Password, user.Salt, hashingConfiguration.Iterations, new HashAlgorithmName(hashingConfiguration.Algorithm)).GetBytes(hashingConfiguration.AlgorithmLength);
-
-                await context.AddAsync(user);
-                await context.SaveChangesAsync();
-
-                return Created("", newUser);
             }
             catch (Exception exception)
             {
