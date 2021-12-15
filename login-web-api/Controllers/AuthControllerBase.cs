@@ -19,7 +19,8 @@ namespace login_web_api.Controllers
             SecurityContext context,
             IOptions<HashingConfiguration> hashingConfiguration = null,
             IOptions<SesionConfiguration> sesionConfiguration = null
-        ) {
+        )
+        {
             this.context = context;
             this.hashingConfiguration = hashingConfiguration.Value;
             this.sesionConfiguration = sesionConfiguration.Value;

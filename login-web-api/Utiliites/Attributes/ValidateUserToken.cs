@@ -1,6 +1,5 @@
 ﻿using login_data_access.Contexts.SecurityContext;
 using login_data_access.Contexts.SecurityContext.Models;
-using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +53,7 @@ namespace login_web_api
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
             SecurityContext dbContext = new SecurityContext(optionsBuilder.Options);
-            
+
             Sesion sesion = dbContext.Sesions.Find(tokenGuid.ToByteArray());
             if (sesion == null || sesion?.ValidUntil <= DateTime.Now)
             {
