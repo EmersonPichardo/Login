@@ -47,8 +47,7 @@ namespace login_web_api
                 return;
             }
 
-            bool isRemote = AppSetting.GetValue<bool>("IsRemote");
-            string connectionString = AppSetting.GetConnectionString($"SecurityConnection{(isRemote ? "Remote" : "")}");
+            string connectionString = AppSetting.GetConnectionString("SecurityConnection");
             DbContextOptionsBuilder<SecurityContext> optionsBuilder = new DbContextOptionsBuilder<SecurityContext>();
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
