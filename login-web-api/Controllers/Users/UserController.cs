@@ -4,27 +4,15 @@ using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace login_web_api.Controllers.Users
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : AuthControllerBase
     {
-        private readonly SecurityContext context;
-        private readonly HashingConfiguration hashingConfiguration;
-        private readonly SesionConfiguration sesionConfiguration;
-
         public UserController(SecurityContext context, IOptions<HashingConfiguration> hashingConfiguration, IOptions<SesionConfiguration> sesionConfiguration)
-        {
-            this.context = context;
-            this.hashingConfiguration = hashingConfiguration.Value;
-            this.sesionConfiguration = sesionConfiguration.Value;
-        }
+            : base(context, hashingConfiguration, sesionConfiguration) { }
 
         [HttpPost]
         public async Task<ActionResult> Register(NewUser newUser)
@@ -38,12 +26,14 @@ namespace login_web_api.Controllers.Users
                 )
                     return BadRequest();
 
-                User user = context.Users.SingleOrDefault(user => user.Email == newUser.Email);
+                string applicationToken = GetApplicationToken<string>();
 
+                User user = await context.Users.SingleOrDefaultAsync(user => user.Email == newUser.Email && user.Application_Id == applicationToken);
                 if (user != null) return Conflict();
 
                 user = new User()
                 {
+                    Application_Id = applicationToken,
                     Email = newUser.Email,
                     Name = newUser.Name
                 };
@@ -61,28 +51,16 @@ namespace login_web_api.Controllers.Users
             }
         }
 
-        [HttpGet]
+        [HttpGet, ValidateUserToken]
         public async Task<ActionResult<UserDto>> GetUser()
         {
             try
             {
-                StringValues token;
-                if (!Request.Headers.TryGetValue("Token", out token)) return BadRequest();
-
-                if (string.IsNullOrWhiteSpace(token)) return BadRequest();
-
-                Guid tokenGuid;
-                if (!Guid.TryParse(token, out tokenGuid)) return BadRequest();
-
-                Sesion sesion = await context.Sesions.FindAsync(tokenGuid.ToByteArray());
+                Sesion sesion = await context.Sesions.FindAsync(GetUserToken<byte[]>());
                 if (sesion == null || sesion?.ValidUntil <= DateTime.Now) return NotFound();
 
                 User user = await context.Users.FindAsync(sesion.User_Id);
                 if (user == null) return NotFound();
-
-                sesion.ValidUntil = DateTime.Now.AddMinutes(sesionConfiguration.Minutes);
-                context.Entry(sesion).State = EntityState.Modified;
-                await context.SaveChangesAsync();
 
                 UserDto data = new UserDto()
                 {

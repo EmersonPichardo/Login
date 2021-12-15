@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using login_data_access.Contexts.SecurityContext;
 
 namespace login_data_access.Migrations
 {
     [DbContext(typeof(SecurityContext))]
-    partial class SecurityContextModelSnapshot : ModelSnapshot
+    [Migration("20211214195910_security-context-drop-sesions-2")]
+    partial class securitycontextdropsesions2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,27 +39,6 @@ namespace login_data_access.Migrations
                         .HasDatabaseName("ind_applications_name");
 
                     b.ToTable("applications");
-                });
-
-            modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.Sesion", b =>
-                {
-                    b.Property<byte[]>("Token")
-                        .HasColumnType("varbinary(16)")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn);
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ValidUntil")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("Token")
-                        .HasName("pk_sesions");
-
-                    b.HasIndex("User_Id")
-                        .HasDatabaseName("ind_sesions_user_id");
-
-                    b.ToTable("sesions");
                 });
 
             modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.User", b =>
@@ -98,16 +79,6 @@ namespace login_data_access.Migrations
                         .HasDatabaseName("unq_users_email");
 
                     b.ToTable("users");
-                });
-
-            modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.Sesion", b =>
-                {
-                    b.HasOne("login_data_access.Contexts.SecurityContext.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("User_Id")
-                        .HasConstraintName("fk_sesions_users")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("login_data_access.Contexts.SecurityContext.Models.User", b =>

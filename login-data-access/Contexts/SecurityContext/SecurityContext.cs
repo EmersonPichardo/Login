@@ -7,6 +7,7 @@ namespace login_data_access.Contexts.SecurityContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Sesion> Sesions { get; set; }
+        public DbSet<Application> Applications { get; set; }
 
         public SecurityContext(DbContextOptions<SecurityContext> options) : base(options) { }
 
@@ -16,6 +17,7 @@ namespace login_data_access.Contexts.SecurityContext
 
             modelBuilder.ApplyConfiguration(new User.Configuration());
             modelBuilder.ApplyConfiguration(new Sesion.Configuration());
+            modelBuilder.ApplyConfiguration(new Application.Configuration());
         }
     }
 }

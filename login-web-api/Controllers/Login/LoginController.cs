@@ -4,7 +4,6 @@ using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -13,20 +12,10 @@ using System.Threading.Tasks;
 
 namespace login_web_api.Controllers.Login
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LoginController : ControllerBase
+    public class LoginController : AuthControllerBase
     {
-        private readonly SecurityContext context;
-        private readonly SesionConfiguration sesionConfiguration;
-        private readonly HashingConfiguration hashingConfiguration;
-
-        public LoginController(SecurityContext context, IOptions<SesionConfiguration> sesionConfiguration, IOptions<HashingConfiguration> hashingConfiguration)
-        {
-            this.context = context;
-            this.sesionConfiguration = sesionConfiguration.Value;
-            this.hashingConfiguration = hashingConfiguration.Value;
-        }
+        public LoginController(SecurityContext context, IOptions<HashingConfiguration> hashingConfiguration, IOptions<SesionConfiguration> sesionConfiguration)
+            : base(context, hashingConfiguration, sesionConfiguration) { }
 
         [HttpPost]
         public async Task<ActionResult<UserData>> Login(Credentials credentials)
@@ -39,8 +28,8 @@ namespace login_web_api.Controllers.Login
                 )
                     return BadRequest();
 
-                User user = context.Users.SingleOrDefault(user => user.Email == credentials.Email);
-
+                string applicationToken = GetApplicationToken<string>();
+                User user = await context.Users.SingleOrDefaultAsync(user => user.Email == credentials.Email && user.Application_Id == applicationToken);
                 if (user == null) return NotFound();
 
                 int interationsBytes_Length = 2;
@@ -57,7 +46,7 @@ namespace login_web_api.Controllers.Login
 
                 if (Enumerable.SequenceEqual(user.Password, hashedPassword))
                 {
-                    Sesion currentSesion = context.Sesions.SingleOrDefault(sesion => sesion.User_Id == user.Id);
+                    Sesion currentSesion = await context.Sesions.SingleOrDefaultAsync(sesion => sesion.User_Id == user.Id);
 
                     if (currentSesion != null)
                     {
@@ -101,15 +90,7 @@ namespace login_web_api.Controllers.Login
         {
             try
             {
-                StringValues token;
-                if (!Request.Headers.TryGetValue("Token", out token)) return BadRequest();
-
-                if (string.IsNullOrWhiteSpace(token)) return BadRequest();
-
-                Guid tokenGuid;
-                if (!Guid.TryParse(token, out tokenGuid)) return BadRequest();
-
-                Sesion sesion = await context.Sesions.FindAsync(tokenGuid.ToByteArray());
+                Sesion sesion = await context.Sesions.FindAsync(GetUserToken<byte[]>());
                 if (sesion == null || sesion?.ValidUntil <= DateTime.Now) return Ok(false);
 
                 sesion.ValidUntil = DateTime.Now.AddMinutes(sesionConfiguration.Minutes);

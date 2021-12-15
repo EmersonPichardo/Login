@@ -16,12 +16,14 @@ namespace login_data_access.Contexts.SecurityContext.Models
             {
                 builder.ToTable("sesions");
 
-                builder.Property(user => user.Token).HasColumnType("varbinary(64)").UseMySqlComputedColumn().IsRequired();
-                builder.HasKey(user => user.Token).HasName("pk_sesions");
-                builder.Property(user => user.User_Id).HasColumnType("int").IsRequired();
-                builder.Property(user => user.ValidUntil).HasColumnType("datetime").IsRequired();
+                builder.HasIndex(sesion => sesion.User_Id).HasDatabaseName("ind_sesions_user_id");
 
-                builder.HasOne<User>().WithMany().HasPrincipalKey(user => user.Id).HasForeignKey(sesion => sesion.User_Id);
+                builder.Property(sesion => sesion.Token).HasColumnType("varbinary(16)").UseMySqlComputedColumn().IsRequired();
+                builder.HasKey(sesion => sesion.Token).HasName("pk_sesions");
+                builder.Property(sesion => sesion.User_Id).HasColumnType("int").IsRequired();
+                builder.Property(sesion => sesion.ValidUntil).HasColumnType("datetime").IsRequired();
+
+                builder.HasOne<User>().WithMany().HasPrincipalKey(sesion => sesion.Id).HasForeignKey(sesion => sesion.User_Id).HasConstraintName("fk_sesions_users");
             }
         }
     }

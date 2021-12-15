@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using login_data_access.Contexts.SecurityContext;
 
 namespace login_data_access.Migrations
 {
     [DbContext(typeof(SecurityContext))]
-    partial class SecurityContextModelSnapshot : ModelSnapshot
+    [Migration("20211214195234_security-context-constraints-names")]
+    partial class securitycontextconstraintsnames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,8 +56,7 @@ namespace login_data_access.Migrations
                     b.HasKey("Token")
                         .HasName("pk_sesions");
 
-                    b.HasIndex("User_Id")
-                        .HasDatabaseName("ind_sesions_user_id");
+                    b.HasIndex("User_Id");
 
                     b.ToTable("sesions");
                 });
@@ -90,8 +91,7 @@ namespace login_data_access.Migrations
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("Application_Id")
-                        .HasDatabaseName("ind_users_application_id");
+                    b.HasIndex("Application_Id");
 
                     b.HasIndex("Email")
                         .IsUnique()

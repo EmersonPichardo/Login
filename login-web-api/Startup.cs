@@ -23,8 +23,8 @@ namespace login_web_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            bool isRemote = true;
-            string securityConnectionString = Configuration.GetConnectionString($"SecurityConnection{(isRemote ? "Remote" : string.Empty)}");
+            bool isRemote = Configuration.GetValue<bool>("IsRemote");
+            string securityConnectionString = Configuration.GetConnectionString($"SecurityConnection{(isRemote ? "Remote" : "")}");
             services.AddDbContextPool<SecurityContext>(options => options.UseMySql(securityConnectionString, ServerVersion.AutoDetect(securityConnectionString)));
 
             services.Configure<HashingConfiguration>(Configuration.GetSection("Hashing"));
