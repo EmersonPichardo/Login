@@ -18,7 +18,7 @@ namespace login_data_access.Contexts.SecurityContext.Models
 
                 builder.HasIndex(sesion => sesion.User_Id).HasDatabaseName("ind_sesions_user_id");
 
-                builder.Property(sesion => sesion.Token).HasColumnType("varbinary(16)").UseMySqlComputedColumn().IsRequired();
+                builder.Property(sesion => sesion.Token).HasColumnType("varbinary(16)").IsRequired();
                 builder.HasKey(sesion => sesion.Token).HasName("pk_sesions");
                 builder.Property(sesion => sesion.User_Id).HasColumnType("int").IsRequired();
                 builder.Property(sesion => sesion.ValidUntil).HasColumnType("datetime").IsRequired();

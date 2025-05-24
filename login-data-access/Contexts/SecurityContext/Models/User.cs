@@ -22,7 +22,7 @@ namespace login_data_access.Contexts.SecurityContext.Models
                 builder.HasIndex(user => user.Application_Id).HasDatabaseName("ind_users_application_id");
                 builder.HasIndex(user => user.Email).IsUnique().HasDatabaseName("unq_users_email");
 
-                builder.Property(user => user.Id).HasColumnType("int").UseMySqlIdentityColumn().IsRequired();
+                builder.Property(user => user.Id).HasColumnType("int").UseIdentityColumn().IsRequired();
                 builder.Property(user => user.Application_Id).HasColumnType("char(32)").IsRequired();
                 builder.Property(user => user.Email).HasColumnType("varchar(64)").IsRequired();
                 builder.Property(user => user.Name).HasColumnType("varchar(16)").IsRequired();

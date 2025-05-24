@@ -3,6 +3,7 @@ using login_web_api.SettingsModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json.Linq;
 using System;
 
 namespace login_web_api.Controllers
@@ -38,33 +39,13 @@ namespace login_web_api.Controllers
 
         private T GetToken<T>(string tokenName)
         {
-            Type type = typeof(T);
+            Request.Headers.TryGetValue(tokenName, out var token);
+            var type = typeof(T);
 
-            if (type == typeof(string))
-            {
-                StringValues token;
-                Request.Headers.TryGetValue(tokenName, out token);
-
-                return (T)(object)token.ToString();
-            }
-            else if (type == typeof(Guid))
-            {
-                StringValues token;
-                Request.Headers.TryGetValue(tokenName, out token);
-
-                return (T)(object)Guid.Parse(token);
-            }
-            else if (type == typeof(byte[]))
-            {
-                StringValues token;
-                Request.Headers.TryGetValue(tokenName, out token);
-
-                return (T)(object)Guid.Parse(token).ToByteArray();
-            }
-            else
-            {
-                return default;
-            }
+            return type == typeof(string) ? (T)(object)token.ToString() :
+                   type == typeof(Guid) && Guid.TryParse(token, out var guid) ? (T)(object)guid :
+                   type == typeof(byte[]) && Guid.TryParse(token, out guid) ? (T)(object)guid.ToByteArray() :
+                   default;
         }
     }
 }

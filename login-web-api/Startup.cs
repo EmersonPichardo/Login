@@ -24,15 +24,10 @@ namespace login_web_api
         public void ConfigureServices(IServiceCollection services)
         {
             string securityConnectionString = Configuration.GetConnectionString("SecurityConnection");
-            services.AddDbContextPool<SecurityContext>(options => options.UseMySql(securityConnectionString, ServerVersion.AutoDetect(securityConnectionString)));
+            services.AddDbContextPool<SecurityContext>(options => options.UseSqlServer(securityConnectionString));
 
             services.Configure<HashingConfiguration>(Configuration.GetSection("Hashing"));
             services.Configure<SesionConfiguration>(Configuration.GetSection("Sesion"));
-
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.KnownProxies.Add(IPAddress.Parse("129.158.45.48"));
-            });
 
             services.AddControllers();
         }

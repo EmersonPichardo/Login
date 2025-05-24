@@ -48,7 +48,7 @@ namespace login_web_api
 
             string connectionString = AppSetting.GetConnectionString("SecurityConnection");
             DbContextOptionsBuilder<SecurityContext> optionsBuilder = new DbContextOptionsBuilder<SecurityContext>();
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            optionsBuilder.UseSqlServer(connectionString);
 
             SecurityContext dbContext = new SecurityContext(optionsBuilder.Options);
             if (!(dbContext.Applications.Any(app => app.Id == applicationToken.ToString() && app.Status == ApplicationStatus.Active.ToString())))
