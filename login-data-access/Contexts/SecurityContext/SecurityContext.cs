@@ -14,6 +14,7 @@ namespace login_data_access.Contexts.SecurityContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasDefaultSchema("security");
 
             modelBuilder.ApplyConfiguration(new User.Configuration());
             modelBuilder.ApplyConfiguration(new Sesion.Configuration());
